@@ -115,7 +115,7 @@ final case class ToppSampler(maxElements: Int, topp: Float, rng: RandomGenerator
       for (i <- (n0 - 1).to(lastIndex).by(-1)) {
         cdf = cdf + logits.get(indices(i))
         if (r < cdf) {
-          break(i)
+          break(indices(i))
         }
       }
 
