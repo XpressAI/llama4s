@@ -46,7 +46,7 @@ final case class CategoricalSampler(rng: RandomGenerator) extends Sampler {
   def apply(logits: FloatTensor): Int = boundary {
     // Sample index from probabilities (they must sum to 1!)
     val random0to1 = rng.nextFloat(1f)
-    var cdf = 0.0f;
+    var cdf = 0.0f
     for (i <- 0.until(logits.size)) {
       cdf += logits.get(i)
       if (random0to1 < cdf) {
@@ -69,10 +69,10 @@ final case class ToppSampler(maxElements: Int, topp: Float, rng: RandomGenerator
 
     val n = logits.size
     var head = 0
-    var tail = n - 1;
+    var tail = n - 1
     // values smaller than (1 - topp) / (n - 1) cannot be part of the result
     // so for efficiency we crop these out as candidates before sorting
-    val cutoff: Float = (1.0f - topp) / (n - 1);
+    val cutoff: Float = (1.0f - topp) / (n - 1)
     for (i <- 0.until(indices.length)) {
       if (logits.get(i) >= cutoff) {
         indices(head) = i
@@ -113,7 +113,7 @@ final case class ToppSampler(maxElements: Int, topp: Float, rng: RandomGenerator
 
     boundary {
       for (i <- (n0 - 1).to(lastIndex).by(-1)) {
-        cdf = cdf + logits.get(indices(i));
+        cdf = cdf + logits.get(indices(i))
         if (r < cdf) {
           break(i)
         }

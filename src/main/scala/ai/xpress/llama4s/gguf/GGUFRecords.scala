@@ -11,7 +11,11 @@ import java.nio.channels.FileChannel
 import java.nio.file.Path
 import jdk.incubator.vector.VectorSpecies
 
-final case class GGUFTensorInfo private[gguf] (name: String, dimensions: Array[Int], ggmlType: GGMLType, offset: Long)
+final case class GGUFTensorInfo private[gguf] (name: String, dimensions: Array[Int], ggmlType: GGMLType, offset: Long) {
+  override def toString: String = {
+    f"${getClass.getSimpleName}: ${name}%-30s @${offset}%-20s ${ggmlType}%-10s ${dimensions.mkString("[ ", ", ", " ]")}"
+  }
+}
 
 final case class GGMLTensorEntry private[gguf] (
     name: String,
@@ -20,6 +24,10 @@ final case class GGMLTensorEntry private[gguf] (
     mappedFile: MemorySegment,
     segment: MemorySegment
 ) {
+  override def toString: String = {
+    f"${getClass.getSimpleName}: ${name}%-30s ${ggmlType}%-10s ${shape.mkString("[ ", ", ", " ]")}"
+  }
+
   def asFloatT(using VectorSpecies[JFloat]): FloatTensor = {
     ggmlType match {
       case Q8_0 =>
@@ -67,8 +75,8 @@ object GGUFFile {
     }
 
     // Padding to the nearest multiple of `ALIGNMENT`.
-    // uint8_t _padding[ALIGNMENT - (sizeof(header + tensor_infos) % ALIGNMENT)];
-    // long _padding = -fileChannel.position() & (ALIGNMENT - 1);
+    // uint8_t _padding[ALIGNMENT - (sizeof(header + tensor_infos) % ALIGNMENT)]
+    // long _padding = -fileChannel.position() & (ALIGNMENT - 1)
     val padding = header.alignment - (channel.position % header.alignment)
     channel.position(channel.position + padding)
 
@@ -82,7 +90,7 @@ object GGUFFile {
     // Each tensor's data must be stored within this array, and located through its `tensor_infos` entry.
     // The offset of each tensor's data must be a multiple of `ALIGNMENT`, and the space between tensors
     // should be padded to `ALIGNMENT` bytes.
-    // uint8_t tensor_data[];
+    // uint8_t tensor_data[]
     val tensorDataOffset = channel.position
 
     GGUFFile(header, tensorInfos, tensorDataOffset)

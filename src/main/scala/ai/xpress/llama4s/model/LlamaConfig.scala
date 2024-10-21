@@ -10,10 +10,7 @@ object LlamaConfig {
       metadata("llama.feed_forward_length").asInstanceOf[Int],
       metadata("llama.block_count").asInstanceOf[Int],
       metadata("llama.attention.head_count").asInstanceOf[Int],
-      if (metadata.contains("llama.attention.head_count_kv")) {
-        metadata("llama.attention.head_count_kv").asInstanceOf[Int]
-      } else
-        metadata("llama.attention.head_count").asInstanceOf[Int],
+      metadata.getOrElse("llama.attention.head_count_kv", metadata("llama.attention.head_count")).asInstanceOf[Int],
       0, // Fill in later
       metadata("llama.context_length").asInstanceOf[Int],
       metadata.getOrElse("llama.attention.layer_norm_rms_epsilon", 1e-5f).asInstanceOf[Float],

@@ -62,7 +62,7 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
         }
 
         if (!options.stream.value) {
-          System.out.println(model.tokenizer.decode(response));
+          System.out.println(model.tokenizer.decode(response))
         }
 
         if (stopToken.nonEmpty) {
@@ -101,7 +101,7 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
     }
 
     if (!options.stream.value) {
-      System.out.println(model.tokenizer.decode(response));
+      System.out.println(model.tokenizer.decode(response))
     }
   }
 }

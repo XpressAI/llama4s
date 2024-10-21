@@ -69,7 +69,7 @@ final class GGUFFileChannel private[gguf] (val channel: FileChannel)(using byteo
   private[gguf] def readString: String = {
     // A string in GGUF.
     // The length of the string, in bytes.
-    // uint64_t len;
+    // uint64_t len
     val len = readLong.toIntExact
 
     // The string as a UTF-8 non-null-terminated string.
@@ -100,7 +100,7 @@ final class GGUFFileChannel private[gguf] (val channel: FileChannel)(using byteo
     val len = readLong.toIntExact
 
     // The array of values.
-    // gguf_metadata_value_t array[len];
+    // gguf_metadata_value_t array[len]
     valtype match {
       case UINT8 | INT8 =>
         0.until(len).map(_ => readByte).toArray

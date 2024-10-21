@@ -29,7 +29,7 @@ final class LlamaState(config: LlamaConfig)(using VectorSpecies[JFloat]) {
   val logits = ArrayFloatTensor.allocate(config.vocabularySize)
 
   // KV cache
-  val kvDim = (config.dim * config.numberOfKeyValueHeads) / config.numberOfHeads;
+  val kvDim = (config.dim * config.numberOfKeyValueHeads) / config.numberOfHeads
   // (n_layer, seq_len, kv_dim)
   val keyCache = {
     1.to(config.numberOfLayers).map(_ => ArrayFloatTensor.allocate(config.contextLength, kvDim)).toArray

@@ -25,7 +25,6 @@ final class Q4_0FloatTensor(buffer: MemorySegment, val size: Int)(using fspecies
   override val ggmlType: GGMLType = GGMLType.Q4_0
 
   override def get(index: Int): Float = {
-    print(index)
     assert(0 <= index && index < size)
 
     // [ 2 byte scale factor | 4 bits per element x 32 scalar values ]
@@ -85,8 +84,8 @@ final class Q4_0FloatTensor(buffer: MemorySegment, val size: Int)(using fspecies
         // Perform elementwise-multiply
         val sum0 = other.getVec(otherOffset + j + 0 * fspecies.length) * loBytes.castTo[Float](0)
         val sum1 = other.getVec(otherOffset + j + 1 * fspecies.length) * loBytes.castTo[Float](1)
-        val sum2 = other.getVec(otherOffset + j + 2 * fspecies.length) * hiBytes.castTo[Float](2)
-        val sum3 = other.getVec(otherOffset + j + 3 * fspecies.length) * hiBytes.castTo[Float](3)
+        val sum2 = other.getVec(otherOffset + j + 2 * fspecies.length) * hiBytes.castTo[Float](0)
+        val sum3 = other.getVec(otherOffset + j + 3 * fspecies.length) * hiBytes.castTo[Float](1)
         // Add the elements
         accum = (sum0 + sum1 + sum2 + sum3).fma(scale, accum)
 

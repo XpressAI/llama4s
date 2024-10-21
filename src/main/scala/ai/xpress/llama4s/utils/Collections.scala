@@ -19,16 +19,16 @@ extension [A](arr: Array[A]) {
     var prev = from
     var next = 0
     while ({
-      next = 2 * prev + 1;
+      next = 2 * prev + 1
       next
     } < n) {
       var r = 2 * prev + 2
       if (r < n && ord.compare(arr(r), arr(next)) < 0) {
-        next = r;
+        next = r
       }
       if (ord.compare(arr(next), arr(prev)) < 0) {
         arr.swap(prev, next)
-        prev = next;
+        prev = next
       } else {
         return
       }

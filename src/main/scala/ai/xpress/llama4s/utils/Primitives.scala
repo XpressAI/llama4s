@@ -15,11 +15,11 @@ import jdk.incubator.vector.VectorSpecies
 import jdk.incubator.vector.{Vector => JVector}
 
 extension (vec: FloatVector) {
-  def +(other: JVector[JFloat]): FloatVector = {
+  inline def +(other: JVector[JFloat]): FloatVector = {
     vec.add(other)
   }
 
-  def *(other: JVector[JFloat]): FloatVector = {
+  inline def *(other: JVector[JFloat]): FloatVector = {
     vec.mul(other)
   }
 }
@@ -39,41 +39,41 @@ type ToJavaPrimitive[T <: AnyVal | JNumeric] = T match {
 // format: on
 
 extension [T](vec: JVector[T]) {
-  def castTo[U <: AnyVal | JNumeric](
-      part: Int
+  inline def castTo[U <: AnyVal | JNumeric](
+    part: Int
   )(using species: VectorSpecies[ToJavaPrimitive[U]]): JVector[ToJavaPrimitive[U]] = {
     vec.castShape(species, part)
   }
 }
 
 extension (x: Short) {
-  def f16ToF32: Float = {
+  inline def f16ToF32: Float = {
     JFloat.float16ToFloat(x)
   }
 }
 
 extension (x: Int) {
-  def intBitsToFloat: Float = {
+  inline def intBitsToFloat: Float = {
     JFloat.intBitsToFloat(x)
   }
 
-  def bitCount: Int = {
+  inline def bitCount: Int = {
     JInt.bitCount(x)
   }
 }
 
 extension (x: Long) {
-  def longBitsToDouble: Double = {
+  inline def longBitsToDouble: Double = {
     JDouble.longBitsToDouble(x)
   }
 
-  def toIntExact: Int = {
+  inline def toIntExact: Int = {
     Math.toIntExact(x)
   }
 }
 
 extension (array: Array[Float]) {
-  def toByteBuffer: ByteBuffer = {
+  inline def toByteBuffer: ByteBuffer = {
     val buffer = ByteBuffer.allocate(array.size * JFloat.BYTES)
     buffer.asFloatBuffer.put(array)
     buffer
@@ -81,13 +81,13 @@ extension (array: Array[Float]) {
 }
 
 extension (x: String) {
-  def toPath: Path = {
-    FileSystems.getDefault().getPath(x)
+  inline def toPath: Path = {
+    FileSystems.getDefault.getPath(x.replaceFirst("^~", System.getProperty("user.home"))).toAbsolutePath
   }
 }
 
 extension (path: Path) {
-  def exists: Boolean = {
+  inline def exists: Boolean = {
     Files.exists(path)
   }
 }

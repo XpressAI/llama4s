@@ -12,15 +12,20 @@ final class F16FloatTensorUnitSpec extends AnyWordSpec {
   given VectorSpecies[JFloat] = FloatTensor.FloatSpecies
 
   classOf[F16FloatTensor].getSimpleName should {
-    val array = 0.to(Random.nextInt(50)).map(_ => Random.nextFloat).toArray
-    val tensor = new ArrayFloatTensor(array)
-
     "correctly store Floats" in {
-      tensor.toArray.toSeq should be (array.toSeq)
+      val array = 0.to(Random.nextInt(50)).map(_ => Random.nextFloat).toArray
+      val tensor = array.toFloatTensor
+      tensor.toArray.toSeq should be(array.toSeq)
     }
 
-    "perform dot product" in {
-      tensor.dot(0, tensor, 0, tensor.size) should be (array.map(x => x * x).sum)
+    "corectly perform dot product" in {
+      val size = Random.nextInt(50)
+      val a1 = 0.to(size).map(_ => Random.nextFloat).toArray
+      val t1 = a1.toFloatTensor
+      val a2 = 0.to(size).map(_ => Random.nextFloat).toArray
+      val t2 = a2.toFloatTensor
+
+      t1.dot(0, t2, 0, t1.size) should be(a1.zip(a2).map(_ * _).sum)
     }
   }
 }

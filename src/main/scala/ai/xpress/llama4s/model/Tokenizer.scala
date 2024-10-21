@@ -53,7 +53,7 @@ object Tokenizer {
         .toMap
     }
 
-    val baseTokens = 128000; // Assume all tokens after the base ones are special.
+    val baseTokens = 128000 // Assume all tokens after the base ones are special.
     val specialTokens = {
       vocabulary
         .tokens

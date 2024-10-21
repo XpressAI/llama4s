@@ -70,8 +70,4 @@ final case class Weights(
     freqCisReal: FloatTensor, // (seq_len, head_size/2)
     freqCisImag: FloatTensor, // (seq_len, head_size/2)
     wcls: FloatTensor // (vocab_size, dim)
-) {
-  // override def toString: String = {
-  //   s"${getClass.getSimpleName}(vocabsize = ${vocabulary.size}, merges = ${merges.size}, specialtokens = ${specialTokens.size})"
-  // }
-}
+)

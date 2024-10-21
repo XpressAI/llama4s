@@ -20,7 +20,7 @@ object FloatTensor {
 
   def numElements(dims: Int*): Int = {
     assert(dims.size > 0 && dims.forall(_ > 0))
-    dims.reduce(_ + _)
+    dims.reduce(_ * _)
   }
 
   def dot(x: FloatTensor, xOffset: Int, y: FloatTensor, yOffset: Int, size: Int): Float = {

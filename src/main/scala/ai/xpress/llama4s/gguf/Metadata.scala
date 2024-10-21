@@ -29,5 +29,5 @@ enum MetadataValueType(val byteSize: Int) {
   // The value is a 64-bit signed little-endian integer.
   case INT64 extends MetadataValueType(8)
   // The value is a 64-bit IEEE754 floating point number.
-  case FLOAT64 extends MetadataValueType(8);
+  case FLOAT64 extends MetadataValueType(8)
 }

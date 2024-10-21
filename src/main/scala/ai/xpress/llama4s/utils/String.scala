@@ -15,9 +15,9 @@ extension (str: String) {
     val chars = new JStringBuilder
     for (cp <- codepoints) {
       if (Character.getType(cp) == Character.CONTROL && cp != '\n') {
-        chars.append("\\u").append(HexFormat.of().toHexDigits(cp, 4)); // escape
+        chars.append("\\u").append(HexFormat.of().toHexDigits(cp, 4)) // escape
       } else {
-        chars.appendCodePoint(cp); // this character is ok
+        chars.appendCodePoint(cp) // this character is ok
       }
     }
     chars.toString

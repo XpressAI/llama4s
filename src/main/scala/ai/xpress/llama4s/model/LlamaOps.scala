@@ -1,6 +1,7 @@
 package ai.xpress.llama4s.model
 
 import ai.xpress.llama4s.tensor.FloatTensor
+import ai.xpress.llama4s.utils._
 import scala.collection.mutable.{Buffer => MBuf}
 import scala.collection.parallel.immutable.ParRange
 import scala.util.boundary
@@ -190,9 +191,12 @@ extension (model: LlamaModel) {
 
         if (promptIter.hasNext) {
           nextToken = promptIter.next
+          System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
 
         } else {
           nextToken = sampler.apply(state.logits)
+          System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
+
           response += nextToken
           callback(nextToken)
           if (stopTokens.contains(nextToken)) {

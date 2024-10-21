@@ -15,17 +15,17 @@ given _loadB: MemLoad[Byte] = Unsafe.getByte
 given _storeS: MemStore[Short] = Unsafe.putShort
 given _storeB: MemStore[Byte] = Unsafe.putByte
 
-extension (buffer: MemorySegment) {
-  def load[T <: AnyVal: MemLoad](offset: Long): T = {
-    summon[MemLoad[T]](buffer.address + offset)
+extension (segment: MemorySegment) {
+  inline def load[T <: AnyVal: MemLoad](offset: Long): T = {
+    summon[MemLoad[T]](segment.address + offset)
   }
 
-  def store[T <: AnyVal: MemStore](offset: Long, value: T): MemorySegment = {
-    summon[MemStore[T]](buffer.address + offset, value)
-    buffer
+  inline def store[T <: AnyVal: MemStore](offset: Long, value: T): MemorySegment = {
+    summon[MemStore[T]](segment.address + offset, value)
+    segment
   }
 
-  def loadBytesToVec(offset: Long)(using species: VectorSpecies[JByte], bo: ByteOrder): ByteVector = {
-    ByteVector.fromMemorySegment(species, buffer, offset, bo)
+  inline def loadBytesToVec(offset: Long)(using species: VectorSpecies[JByte], bo: ByteOrder): ByteVector = {
+    ByteVector.fromMemorySegment(species, segment, offset, bo)
   }
 }

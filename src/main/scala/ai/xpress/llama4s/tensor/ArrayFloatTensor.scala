@@ -11,5 +11,11 @@ object ArrayFloatTensor {
   }
 }
 
-final class ArrayFloatTensor(array: Array[Float])(using species: VectorSpecies[JFloat])
+final class ArrayFloatTensor(array: Array[Float])(using VectorSpecies[JFloat])
     extends F16FloatTensor(MemorySegment.ofArray(array), array.size)
+
+extension (arr: Array[Float]) {
+  def toFloatTensor(using VectorSpecies[JFloat]): FloatTensor = {
+    new ArrayFloatTensor(arr)
+  }
+}
