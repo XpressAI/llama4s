@@ -27,7 +27,7 @@ object Tokenizer {
     */
   val BytesToUnicode: Map[Int, Int] = {
     val bs = ('!'.to('~') ++ '¡'.to('¬') ++ '®'.to('ÿ')).map(_.asInstanceOf[Int])
-    val ds = 1.until(256).filterNot(bs.contains(_))
+    val ds = 0.until(256).filterNot(bs.contains(_))
 
     (bs ++ ds).zip(bs ++ 256.to(256 + ds.size)).toMap
   }
@@ -42,7 +42,9 @@ object Tokenizer {
         .metadata
         .apply("tokenizer.ggml.merges")
         .asInstanceOf[Array[String]]
-        .map(_.split(" "))
+        .map(x => {
+          x.split(" ")
+        })
         .map { parts =>
           val i1 = vocabulary.indexOf(parts(0)).get
           val i2 = vocabulary.indexOf(parts(1)).get
