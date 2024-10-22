@@ -24,9 +24,6 @@ lazy val LangChain4JVersion = "0.35.0"
 libraryDependencies ++= Seq(
   "org.scala-lang" %% "scala3-library" % defaultScalaVersion,
   "com.lihaoyi" %% "mainargs" % "0.7.6",
-  "dev.langchain4j" % "langchain4j-open-ai" % LangChain4JVersion,
-  "dev.langchain4j" % "langchain4j-hugging-face" % LangChain4JVersion,
-  "dev.langchain4j" % "langchain4j" % LangChain4JVersion,
   "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
   "org.scalatest" %% "scalatest" % "3.2.19" % Test
 )
