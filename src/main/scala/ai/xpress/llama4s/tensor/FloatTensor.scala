@@ -1,8 +1,10 @@
 package ai.xpress.llama4s.tensor
 
 import ai.xpress.llama4s.gguf.GGMLType
-import scala.collection.parallel.immutable.ParRange
+import ai.xpress.llama4s.utils.{_, given}
 import java.lang.Boolean
+import java.lang.foreign.MemorySegment
+import java.util.stream.IntStream
 import jdk.incubator.vector.FloatVector
 
 object FloatTensor {
@@ -18,16 +20,21 @@ object FloatTensor {
     }
   }
 
-  def numElements(dims: Int*): Int = {
+  def loadF16(buffer: MemorySegment, offset: Int): Float = {
+    buffer.load[Short](offset).f16ToF32
+  }
+
+  inline def numElements(dims: Int*): Int = {
     assert(dims.size > 0 && dims.forall(_ > 0))
     dims.reduce(_ * _)
   }
 
   def dot(x: FloatTensor, xOffset: Int, y: FloatTensor, yOffset: Int, size: Int): Float = {
-    0.until(size)
-      .foldLeft(0f) { case (accum, j) =>
-        accum + (x.get(xOffset + j) * y.get(yOffset + j))
-      }
+    var accum = 0f
+    for (j <- 0 until size) {
+      accum += (x.get(xOffset + j) * y.get(yOffset + j))
+    }
+    accum
   }
 }
 
@@ -50,6 +57,8 @@ trait FloatTensor {
     s"${getClass.getSimpleName}(size = ${size}, ${0.until(pos).map(get(_)).mkString("[ ", ", ", ed)} )"
   }
 
+  def buffer: MemorySegment
+
   def size: Int
 
   def get(index: Int): Float
@@ -71,7 +80,7 @@ trait FloatTensor {
   def dot(offset: Int, other: FloatTensor, otherOffset: Int, size: Int): Float
 
   def matmul_(other: FloatTensor, out: FloatTensor, dim0: Int, dim1: Int): Unit = {
-    ParRange(0, dim0, 1, false).foreach(i => out.set(i, dot(i * dim1, other, 0, dim1)))
+    IntStream.range(0, dim0).parallel.forEach(i => out.set(i, dot(i * dim1, other, 0, dim1)))
   }
 
   def map_(offset: Int, size: Int)(func: Float => Float): FloatTensor = {
@@ -97,10 +106,11 @@ trait FloatTensor {
   }
 
   def foldLeft(offset: Int, size: Int, seed: Float)(func: (Float, Float) => Float): Float = {
-    0.until(size)
-      .foldLeft(seed) { case (accum, i) =>
-        func(accum, get(offset + i))
-      }
+    var accum = seed
+    for (i <- 0 until size) {
+      accum = func(accum, get(offset + i))
+    }
+    accum
   }
 
   def copyTo(offset: Int, other: FloatTensor, otherOffset: Int, size: Int): Unit = {

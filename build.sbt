@@ -33,5 +33,9 @@ lazy val root = project
   .settings(
     name := "llmtest",
     ThisBuild / version := "0.1.0",
-    ThisBuild / scalacOptions += "-Wunused:all"
+    ThisBuild / scalacOptions += "-Wunused:all",
+    ThisBuild / fork := true,
+    ThisBuild / javacOptions ++= Seq( // commands passed to the JVM
+      "--add-modules=jdk.incubator.vector"
+    )
   )

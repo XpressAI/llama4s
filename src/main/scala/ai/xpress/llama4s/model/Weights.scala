@@ -33,7 +33,6 @@ object Weights {
   ): Weights = {
     val tokenEmbeddings = entries("token_embd.weight")
     val (ropeFreqsReal, ropeFreqsImag) = ropeFreqs(entries, config)
-
     Weights(
       tokenEmbeddings.asFloatT,
       0.until(config.numberOfLayers).map(i => entries(s"blk.${i}.attn_norm.weight").asFloatT).toArray,
