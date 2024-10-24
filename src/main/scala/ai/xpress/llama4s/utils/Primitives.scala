@@ -40,7 +40,7 @@ type ToJavaPrimitive[T <: AnyVal | JNumeric] = T match {
 
 extension [T](vec: JVector[T]) {
   inline def castTo[U <: AnyVal | JNumeric](
-    part: Int
+      part: Int
   )(using species: VectorSpecies[ToJavaPrimitive[U]]): JVector[ToJavaPrimitive[U]] = {
     vec.castShape(species, part)
   }

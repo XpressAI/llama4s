@@ -11,7 +11,7 @@ object Float16 {
 
 val QK_K: Int = 256 // or 64?
 
-enum GGMLType(val bytesPerBlock: Int, val blockSize: Int = 1) {
+enum GGMLType(val bytesPerBlock: Int, val blockSize: Int = 1) extends java.lang.Enum[GGMLType] {
   case F32 extends GGMLType(JFloat.BYTES)
   case F16 extends GGMLType(Float16.BYTES)
   case Q4_0 extends GGMLType(Float16.BYTES + 16 * JByte.BYTES, 32)
@@ -44,7 +44,7 @@ enum GGMLType(val bytesPerBlock: Int, val blockSize: Int = 1) {
   }
 
   inline def assertPowerOf2: Unit = {
-    assert(java.lang.Integer.bitCount(blockSize) == 1, "Power of 2")
+    assert(JInt.bitCount(blockSize) == 1, "Power of 2")
   }
 
   inline def blockUpperBound(size: Int) = {

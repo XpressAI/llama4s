@@ -3,8 +3,8 @@ package ai.xpress.llama4s.model
 import ai.xpress.llama4s.tensor.FloatTensor
 import ai.xpress.llama4s.utils._
 import scala.collection.mutable.{Buffer => MBuf}
-import scala.collection.parallel.immutable.ParRange
 import scala.util.boundary
+import java.util.stream.IntStream
 import boundary.break
 
 object LlamaOps {
@@ -88,45 +88,48 @@ extension (model: LlamaModel) {
       val curLayer = l
 
       // multihead attention. iterate over all heads
-      ParRange(0, config.numberOfHeads, 1, false).foreach { h =>
-        // get the query vector for this head
-        // float* q = s.q + h * headSize
-        val qOffset = h * headSize
+      IntStream
+        .range(0, config.numberOfHeads)
+        .parallel
+        .forEach { h =>
+          // get the query vector for this head
+          // float* q = s.q + h * headSize
+          val qOffset = h * headSize
 
-        // attention scores for this head
-        // float* att = s.att + h * config.seq_len
-        val attOffset = h * config.contextLength
+          // attention scores for this head
+          // float* att = s.att + h * config.seq_len
+          val attOffset = h * config.contextLength
 
-        // iterate over all timesteps, including the current one
-        for (t <- 0 to position) {
-          // get the key vector for this head and at this timestep
-          // float* k = s.key_cache + loff + t * dim + h * headSize
-          val keyCacheOffset = /* loff + */ t * kvDim + (h / kvMul) * headSize
-          // calculate the attention score as the dot product of q and k
-          val score = state.q.dot(qOffset, state.keyCache(curLayer), keyCacheOffset, headSize) / sqrtHeadSize
-          // save the score to the attention buffer
-          state.att.set(attOffset + t, score)
+          // iterate over all timesteps, including the current one
+          for (t <- 0 to position) {
+            // get the key vector for this head and at this timestep
+            // float* k = s.key_cache + loff + t * dim + h * headSize
+            val keyCacheOffset = /* loff + */ t * kvDim + (h / kvMul) * headSize
+            // calculate the attention score as the dot product of q and k
+            val score = state.q.dot(qOffset, state.keyCache(curLayer), keyCacheOffset, headSize) / sqrtHeadSize
+            // save the score to the attention buffer
+            state.att.set(attOffset + t, score)
+          }
+
+          // softmax the scores to get attention weights, from 0..position inclusively
+          state.att.softmax_(attOffset, position + 1)
+
+          // weighted sum of the values, store back into xb
+          // float* xb = s.xb + h * headSize
+          val xbOffset = h * headSize
+          // memset(xb, 0, headSize * sizeof(float))
+          state.xb.fill_(xbOffset, headSize, 0f)
+
+          for (t <- 0 to position) {
+            // get the value vector for this head and at this timestep
+            // float* v = s.value_cache + loff + t * dim + h * headSize
+            val vOffset = /* loff + */ t * kvDim + (h / kvMul) * headSize
+            // get the attention weight for this timestep
+            val a = state.att.get(attOffset + t)
+            // accumulate the weighted value into xb
+            state.xb.saxpy_(xbOffset, state.valueCache(curLayer), vOffset, headSize, a)
+          }
         }
-
-        // softmax the scores to get attention weights, from 0..position inclusively
-        state.att.softmax_(attOffset, position + 1)
-
-        // weighted sum of the values, store back into xb
-        // float* xb = s.xb + h * headSize
-        val xbOffset = h * headSize
-        // memset(xb, 0, headSize * sizeof(float))
-        state.xb.fill_(xbOffset, headSize, 0f)
-
-        for (t <- 0 to position) {
-          // get the value vector for this head and at this timestep
-          // float* v = s.value_cache + loff + t * dim + h * headSize
-          val vOffset = /* loff + */ t * kvDim + (h / kvMul) * headSize
-          // get the attention weight for this timestep
-          val a = state.att.get(attOffset + t)
-          // accumulate the weighted value into xb
-          state.xb.saxpy_(xbOffset, state.valueCache(curLayer), vOffset, headSize, a)
-        }
-      }
 
       // final matmul to get the output of the attention
       weights.wo(l).matmul_(state.xb, state.xb2, dim, dim)
