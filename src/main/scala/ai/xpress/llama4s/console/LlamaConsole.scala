@@ -25,17 +25,19 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
     val scanner = new Scanner(System.in)
     boundary {
       while (true) {
-        System.out.print("> ")
+        System.out.print("\n> ")
         System.out.flush
-        val line = scanner.nextLine
+        val input = scanner.nextLine
+        System.out.println("")
 
-        if (Seq("quit", "exit").contains(line)) {
+        if (Seq("quit", "exit").contains(input)) {
+          System.out.println("Good bye!")
           break()
         }
 
         val start = conversation.size
-        conversation ++= format.encodeMessage(ChatFormat.Message(ChatFormat.Role.User, options.prompt))
-        conversation ++ format.encodeHeader(ChatFormat.Role.Assistant)
+        conversation ++= format.encodeMessage(ChatFormat.Message(ChatFormat.Role.User, input))
+        conversation ++= format.encodeHeader(ChatFormat.Role.Assistant)
 
         // Generate the response
         var response = {
@@ -47,7 +49,7 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
             options.maxTokens,
             sampler
           ) { token =>
-            if (options.stream.value && !model.tokenizer.isSpecialToken(token)) {
+            if (options.stream && !model.tokenizer.isSpecialToken(token)) {
               System.out.print(model.tokenizer.decode(token))
             }
           }
@@ -57,23 +59,23 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
 
         var stopToken = Option.empty[Int]
         if (response.lastOption.map(format.stopTokens.contains(_)).getOrElse(false)) {
-          stopToken = Some(response.last)
+          stopToken = response.lastOption
           response = response.dropRight(1)
         }
 
-        if (!options.stream.value) {
+        if (!options.stream) {
           System.out.println(model.tokenizer.decode(response))
         }
 
-        if (stopToken.nonEmpty) {
-          System.err.println("Ran out of context length...")
+        if (stopToken.isEmpty) {
+          System.err.println("\n\nRan out of context length...")
           break()
         }
       }
     }
   }
 
-  def runSingleInstruction: Unit = {
+  def runSingleInstruction(input: String): Unit = {
     val state = model.newState
     val format = ChatFormat(model.tokenizer)
 
@@ -84,13 +86,13 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
       .foreach { sp =>
         prompt ++= format.encodeMessage(ChatFormat.Message(ChatFormat.Role.System, sp))
       }
-    prompt ++= format.encodeMessage(ChatFormat.Message(ChatFormat.Role.User, options.prompt))
+    prompt ++= format.encodeMessage(ChatFormat.Message(ChatFormat.Role.User, input))
     prompt ++= format.encodeHeader(ChatFormat.Role.Assistant)
 
     // Generate the response
     var response = {
       model.generateTokens(state, 0, prompt.toSeq, format.stopTokens, options.maxTokens, sampler) { token =>
-        if (options.stream.value && !model.tokenizer.isSpecialToken(token)) {
+        if (options.stream && !model.tokenizer.isSpecialToken(token)) {
           System.out.print(model.tokenizer.decode(token))
         }
       }
@@ -100,8 +102,17 @@ final class LlamaConsole(model: LlamaModel, sampler: Sampler, options: ConsoleOp
       response = response.dropRight(1)
     }
 
-    if (!options.stream.value) {
+    if (!options.stream) {
       System.out.println(model.tokenizer.decode(response))
+    }
+  }
+
+  def run: Unit = {
+    options.runMode match {
+      case ConsoleOptions.RunMode.Interactive =>
+        runInteractive
+      case ConsoleOptions.RunMode.Once(input) =>
+        runSingleInstruction(input)
     }
   }
 }
@@ -116,10 +127,6 @@ object LlamaConsole {
     val sampler = Sampler.create(model.config.vocabularySize, options.temperature, options.topp, options.seed)
     val console = new LlamaConsole(model, sampler, options)
 
-    if (options.interactive.value) {
-      console.runInteractive
-    } else {
-      console.runSingleInstruction
-    }
+    console.run
   }
 }

@@ -194,11 +194,11 @@ extension (model: LlamaModel) {
 
         if (promptIter.hasNext) {
           nextToken = promptIter.next
-          System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
+          // System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
 
         } else {
           nextToken = sampler.apply(state.logits)
-          System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
+          // System.err.print(model.tokenizer.decode(nextToken).replaceControlChars)
 
           response += nextToken
           callback(nextToken)
