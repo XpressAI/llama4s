@@ -1,6 +1,6 @@
 package ai.xpress.llama4s.model
 
-import ai.xpress.llama4s.gguf.GGUFFile
+import ai.xpress.llama4s.format.gguf.GGUFFile
 
 object Vocabulary {
   def fromGGUF(file: GGUFFile): Vocabulary = {

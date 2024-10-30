@@ -1,16 +1,13 @@
 package ai.xpress.llama4s.model
 
-import ai.xpress.llama4s.gguf.GGMLTensorEntry
-import ai.xpress.llama4s.tensor.ArrayFloatTensor
+import ai.xpress.llama4s.tensor.F32Tensor
 import ai.xpress.llama4s.tensor.FloatTensor
+import ai.xpress.llama4s.tensor.TensorEntry
 import java.lang.{Float => JFloat}
 import jdk.incubator.vector.VectorSpecies
 
 object Weights {
-  private[model] def ropeFreqs(
-      entries: Map[String, GGMLTensorEntry],
-      config: LlamaConfig
-  ): (Array[Float], Array[Float]) = {
+  private[model] def ropeFreqs(entries: Map[String, TensorEntry], config: LlamaConfig): (Array[Float], Array[Float]) = {
     val ropeScaling = entries.contains("rope_freqs")
     val scaleFactor = 8f
     val loFreqFactor = 1f
@@ -28,9 +25,7 @@ object Weights {
     )
   }
 
-  def from(entries: Map[String, GGMLTensorEntry], config: LlamaConfig)(using
-      species: VectorSpecies[JFloat]
-  ): Weights = {
+  def from(entries: Map[String, TensorEntry], config: LlamaConfig)(using species: VectorSpecies[JFloat]): Weights = {
     val tokenEmbeddings = entries("token_embd.weight")
     val (ropeFreqsReal, ropeFreqsImag) = ropeFreqs(entries, config)
     Weights(
@@ -45,8 +40,8 @@ object Weights {
       0.until(config.numberOfLayers).map(i => entries(s"blk.${i}.ffn_down.weight").asFloatT).toArray, // w2
       0.until(config.numberOfLayers).map(i => entries(s"blk.${i}.ffn_up.weight").asFloatT).toArray, // w3
       entries("output_norm.weight").asFloatT,
-      new ArrayFloatTensor(ropeFreqsReal),
-      new ArrayFloatTensor(ropeFreqsImag),
+      F32Tensor.from(ropeFreqsReal),
+      F32Tensor.from(ropeFreqsImag),
       // If "output.weight" is not present then the embedding weights are tied/shared with the decoder.
       // This is commonly referred as "tie word embeddings".
       entries.getOrElse("output.weight", tokenEmbeddings).asFloatT

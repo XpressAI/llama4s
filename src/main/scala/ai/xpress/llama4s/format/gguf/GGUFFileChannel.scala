@@ -1,10 +1,9 @@
-package ai.xpress.llama4s.gguf
+package ai.xpress.llama4s.format.gguf
 
+import ai.xpress.llama4s.format.common.EnhancedFileChannel
 import ai.xpress.llama4s.utils._
-import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
-import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import MetadataValueType._
@@ -15,71 +14,8 @@ object GGUFFileChannel {
   }
 }
 
-final class GGUFFileChannel private[gguf] (val channel: FileChannel)(using byteorder: ByteOrder) {
-  private val BB_1 = ByteBuffer.allocate(1).order(byteorder)
-  private val BB_2 = ByteBuffer.allocate(2).order(byteorder)
-  private val BB_4 = ByteBuffer.allocate(4).order(byteorder)
-  private val BB_8 = ByteBuffer.allocate(8).order(byteorder)
-
-  private[gguf] def position: Long = {
-    channel.position
-  }
-
-  private[gguf] def position(p: Long): GGUFFileChannel = {
-    channel.position(p)
-    this
-  }
-
-  private[gguf] def readByte: Byte = {
-    val bytesRead = channel.read(BB_1)
-    assert(bytesRead == 1)
-    BB_1.clear.get(0)
-  }
-
-  private[gguf] def readBoolean: Boolean = {
-    readByte != 0
-  }
-
-  private[gguf] def readShort: Short = {
-    val bytesRead = channel.read(BB_2)
-    assert(bytesRead == 2)
-    BB_2.clear.getShort(0)
-  }
-
-  private[gguf] def readInt: Int = {
-    val bytesRead = channel.read(BB_4)
-    assert(bytesRead == 4)
-    BB_4.clear.getInt(0)
-  }
-
-  private[gguf] def readLong: Long = {
-    val bytesRead = channel.read(BB_8)
-    assert(bytesRead == 8)
-    BB_8.clear.getLong(0)
-  }
-
-  private[gguf] def readFloat: Float = {
-    readInt.intBitsToFloat
-  }
-
-  private[gguf] def readDouble: Double = {
-    readLong.longBitsToDouble
-  }
-
-  private[gguf] def readString: String = {
-    // A string in GGUF.
-    // The length of the string, in bytes.
-    // uint64_t len
-    val len = readLong.toIntExact
-
-    // The string as a UTF-8 non-null-terminated string.
-    // char string[len]
-    val bytes = new Array[Byte](len)
-    val bytesRead = channel.read(ByteBuffer.wrap(bytes))
-
-    assert(len == bytesRead)
-    new String(bytes, StandardCharsets.UTF_8)
-  }
+final class GGUFFileChannel private[gguf] (val channel: FileChannel)(using byteorder: ByteOrder)
+    extends EnhancedFileChannel[GGUFFileChannel] {
 
   private[gguf] def readMetadataValueType: MetadataValueType = {
     // gguf_metadata_value_type

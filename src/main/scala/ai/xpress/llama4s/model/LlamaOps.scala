@@ -1,7 +1,6 @@
 package ai.xpress.llama4s.model
 
 import ai.xpress.llama4s.tensor.FloatTensor
-import ai.xpress.llama4s.utils._
 import scala.collection.mutable.{Buffer => MBuf}
 import scala.util.boundary
 import java.util.stream.IntStream

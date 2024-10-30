@@ -11,13 +11,13 @@ interface Q4_0TensorOps {
     static final VectorSpecies<Byte> bspecies = ByteVector.SPECIES_128;
     static final ByteOrder byteorder = ByteOrder.LITTLE_ENDIAN;
 
-    static float vdot(FloatTensor thiz,
-                            int thisOffset,
-                            FloatTensor that,
-                            int thatOffset,
-                            int size) {
-        var blockSize = thiz.ggmlType().blockSize();
-        var bytesPerBlock = thiz.ggmlType().bytesPerBlock();
+    static float vdot(Q4_0Tensor thiz,
+                        int thisOffset,
+                        FloatTensor that,
+                        int thatOffset,
+                        int size) {
+        var blockSize = thiz.dtype().blockSize();
+        var bytesPerBlock = thiz.dtype().bytesPerBlock();
 
         var result = 0f;
         var j = 0;

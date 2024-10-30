@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package ai.xpress.llama4s.format.safetensors;
+
+import "google/protobuf/struct.proto";
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+  scope: FILE
+  package_name: "ai.xpress.llama4s.format.safetensors"
+  flat_package: true
+  single_file: true
+  java_conversions: true
+  lenses: true
+  getters: true
+  retain_source_code_info: false
+  no_default_values_in_constructor: false
+  preserve_unknown_fields: false
+  enum_value_naming: CAMEL_CASE
+  enum_strip_prefix: false
+  scala3_sources: true
+};
+
+message STTensorInfo {
+  enum DType {
+    UNKNOWN = 0;
+    BOOL = 1;
+    I8 = 2;
+    U8 = 3;
+    I16 = 4;
+    U16 = 5;
+    F16 = 6;
+    BF16 = 7;
+    I32 = 8;
+    U32 = 9;
+    F32 = 10;
+    I64 = 11;
+    U64 = 12;
+    F64 = 13;
+  }
+
+  string name = 100 [
+    json_name = "name"
+  ];
+
+  DType dtype = 101 [
+    json_name = "dtype"
+  ];
+
+  repeated int32 shape = 102 [
+    json_name = "shape",
+    (scalapb.field).collection_type="Array"
+  ];
+
+  repeated int64 offsets = 103 [
+    json_name = "data_offsets",
+    (scalapb.field).collection_type="Array"
+  ];
+}
+
+message STTensorInfoList {
+  map<string, STTensorInfo> data = 1 [
+    json_name = "data"
+  ];
+}
