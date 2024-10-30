@@ -1,6 +1,6 @@
 package ai.xpress.llama4s.model
 
-import ai.xpress.llama4s.gguf.GGUFFile
+import ai.xpress.llama4s.format.gguf.GGUFFile
 
 object LlamaConfig {
   def fromGGUF(file: GGUFFile): LlamaConfig = {

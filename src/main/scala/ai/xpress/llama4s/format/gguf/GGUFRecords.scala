@@ -1,4 +1,33 @@
-package ai.xpress.llama4s.gguf
+package ai.xpress.llama4s.format.gguf
+
+import ai.xpress.llama4s.format.gguf.GGMLType._
+import ai.xpress.llama4s.tensor._
+import ai.xpress.llama4s.utils._
+
+final case class GGUFTensorInfo private[gguf] (name: String, shape: Array[Int], ggmlType: GGMLType, offset: Long) {
+  inline def sizeInBytes: Long = {
+    ggmlType.toDType.byteSizeFor(FloatTensor.numElements(shape*))
+  }
+
+  inline def show: String = {
+    f"${getClass.getSimpleName}: @${offset}%-12s ${ggmlType}%-10s ${shape.mkString("[", ", ", "]")}%-20s ${name}"
+  }
+}
+
+object GGUFHeader {
+  val MagicValue = 0x46554747
+  val SupportedGGUFVersions = Seq(2, 3)
+  val DefaultAlignment = 32 // must be a power of 2
+}
+
+final case class GGUFHeader private[gguf] (version: Int, tensorCount: Int, metadata: Map[String, AnyVal | AnyRef]) {
+  lazy val alignment: Int = {
+    val avalue = metadata.getOrElse("general.alignment", GGUFHeader.DefaultAlignment).asInstanceOf[Int]
+
+    assert(avalue.bitCount == 1, "alignment must be a power of two")
+    avalue
+  }
+}
 
 enum MetadataValueType(val byteSize: Int) {
   // The value is a 8-bit unsigned integer.

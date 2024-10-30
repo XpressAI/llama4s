@@ -1,6 +1,5 @@
 package ai.xpress.llama4s.tensor
-
-import ai.xpress.llama4s.gguf.GGMLType
+import ai.xpress.llama4s.utils._
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.ValueLayout
 import java.lang.{Float => JFloat}
@@ -8,11 +7,22 @@ import java.nio.ByteOrder
 import jdk.incubator.vector.FloatVector
 import jdk.incubator.vector.VectorSpecies
 
-class F16FloatTensor(val buffer: MemorySegment, val size: Int)(using species: VectorSpecies[JFloat])
-    extends FloatTensor {
+object F32Tensor {
+  def allocate(dims: Int*)(using VectorSpecies[JFloat]): F32Tensor = {
+    val size = FloatTensor.numElements(dims*)
+    val segment = Unsafe.alloc(size * JFloat.BYTES)
+    new F32Tensor(segment, size)
+  }
+
+  def from(array: Array[Float])(using VectorSpecies[JFloat]): F32Tensor = {
+    new F32Tensor(MemorySegment.ofArray(array), array.size)
+  }
+}
+
+class F32Tensor(val buffer: MemorySegment, val size: Int)(using species: VectorSpecies[JFloat]) extends FloatTensor {
   private[tensor] val layout = ValueLayout.JAVA_FLOAT.withOrder(ByteOrder.LITTLE_ENDIAN)
 
-  override lazy val ggmlType: GGMLType = GGMLType.F32
+  override lazy val dtype: ScalarDType = ScalarDType.F32
 
   override def get(index: Int): Float = {
     buffer.get(layout, index.toLong * JFloat.BYTES)

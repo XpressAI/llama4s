@@ -1,6 +1,6 @@
 package ai.xpress.llama4s.model
 
-import ai.xpress.llama4s.gguf._
+import ai.xpress.llama4s.format.gguf._
 import java.lang.{Float => JFloat}
 import java.nio.ByteOrder
 import java.nio.file.Path

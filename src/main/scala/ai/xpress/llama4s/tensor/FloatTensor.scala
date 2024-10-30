@@ -1,6 +1,4 @@
 package ai.xpress.llama4s.tensor
-
-import ai.xpress.llama4s.gguf.GGMLType
 import ai.xpress.llama4s.utils.{_, given}
 import java.lang.Boolean
 import java.lang.foreign.MemorySegment
@@ -75,7 +73,7 @@ trait FloatTensor {
     toArray(0, size)
   }
 
-  def ggmlType: GGMLType
+  def dtype: DType
 
   def dot(offset: Int, other: FloatTensor, otherOffset: Int, size: Int): Float
 

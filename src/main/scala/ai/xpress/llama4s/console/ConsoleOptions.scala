@@ -1,7 +1,6 @@
 package ai.xpress.llama4s.console
 
 import ai.xpress.llama4s.utils._
-import mainargs.Flag
 import mainargs.ParserForClass
 import mainargs.TokensReader
 import mainargs.arg
@@ -59,8 +58,8 @@ final case class ConsoleOptions(
     topp: Float = 0.95f,
     @arg(doc = "Random seed (default: System.nanoTime)")
     seed: Long = System.nanoTime,
-    @arg(doc = "Number of steps to run for < 0 = limited by context length (default: 512)")
-    maxTokens: Int = 512,
+    @arg(doc = "Number of steps to run for < 0 = limited by context length (default: 16384)")
+    maxTokens: Int = 16384,
     @arg(doc = "Print tokens during generation (default: true)")
     stream: Boolean = true,
     @arg(doc = "Print ALL tokens to stderr")
