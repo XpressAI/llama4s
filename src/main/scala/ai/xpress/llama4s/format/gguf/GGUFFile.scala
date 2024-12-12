@@ -51,7 +51,7 @@ final case class GGUFFile(header: GGUFHeader, tensorInfos: Map[String, GGUFTenso
   def show: String = {
     val builder = StringBuilder()
     builder ++= f"\nTensors @ ${tensorDataOffset}\n"
-    tensorInfos.foreach { (_, info) =>
+    tensorInfos.values.toArray.sortBy(_.name).foreach { info =>
       builder ++= info.show + "\n"
     }
     builder.toString
