@@ -1,10 +1,10 @@
 # Llama4S
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Scala Version](https://img.shields.io/badge/Scala-3.5.1-red.svg)](https://www.scala-lang.org/)
+[![Scala Version](https://img.shields.io/badge/Scala-3.6.4-red.svg)](https://www.scala-lang.org/)
 [![Discord](https://img.shields.io/badge/Discord-Join%20us!-7289DA?logo=discord)](https://discord.com/invite/vgEg2ZtxCw)
 
-Practical [Llama 3](https://github.com/meta-llama/llama3), [3.1](https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1) and [3.2](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/) inference implemented purely in Scala 3, leveraging the Java Vector API for performance.
+Practical [Llama 3](https://github.com/meta-llama/llama3), [3.1](https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1) and [3.2](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/) inference implemented purely in Scala 3.6.4, leveraging the Java Vector API for performance.
 
 This project supports running Llama models in GGUF format.
 
@@ -21,7 +21,7 @@ To compile the project and create a runnable JAR file, use the `sbt assembly` co
 sbt assembly
 ```
 
-This will generate a fat JAR file in the `target/scala-3.x.x/` directory (e.g., `target/scala-3.5.1/llmtest-assembly-0.1.0.jar`).
+This will generate a fat JAR file in the `target/scala-3.6.4/` directory (e.g., `target/scala-3.6.4/llmtest-assembly-0.1.0.jar`).
 
 ## Running
 
@@ -32,13 +32,13 @@ Make sure to include the `--add-modules=jdk.incubator.vector` JVM option when ru
 **Example (Interactive Mode):**
 
 ```bash
-java --add-modules=jdk.incubator.vector -jar target/scala-3.5.1/llmtest-assembly-0.1.0.jar --model /path/to/your/model.gguf
+java --add-modules=jdk.incubator.vector -jar target/scala-3.6.4/llmtest-assembly-0.1.0.jar --model /path/to/your/model.gguf
 ```
 
 **Example (Single Prompt Mode):**
 
 ```bash
-java --add-modules=jdk.incubator.vector -jar target/scala-3.5.1/llmtest-assembly-0.1.0.jar \
+java --add-modules=jdk.incubator.vector -jar target/scala-3.6.4/llmtest-assembly-0.1.0.jar \
   --model /path/to/your/model.gguf \
   --prompt "Translate the following English text to French: 'Hello world!'"
 ```

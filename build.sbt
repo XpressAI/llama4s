@@ -7,7 +7,7 @@
 Global / cancelable := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val defaultScalaVersion = "3.5.1"
+lazy val defaultScalaVersion = "3.6.4"
 ThisBuild / scalaVersion := defaultScalaVersion
 ThisBuild / organization := "ai.xpress"
 
@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.thesamet.scalapb" %% "scalapb-json4s" % "0.12.0",
   "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
   "org.json4s" %% "json4s-jackson" % "4.0.7",
-  "org.scala-lang" %% "scala3-library" % defaultScalaVersion,
+  "org.scala-lang" %% "scala3-library" % "3.6.4", // Explicitly update library version too
   "org.scalatest" %% "scalatest" % "3.2.19" % Test
 )
 
