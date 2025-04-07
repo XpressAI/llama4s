@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Scala Version](https://img.shields.io/badge/Scala-3.5.1-red.svg)](https://www.scala-lang.org/)
-[![Discord](https://img.shields.io/discord/1234567890?label=Join%20us%20on%20Discord&logo=discord&color=7289DA)](https://discord.com/invite/vgEg2ZtxCw)
+[![Discord](https://img.shields.io/badge/Discord-Join%20us!-7289DA?logo=discord)](https://discord.com/invite/vgEg2ZtxCw)
 
 Practical [Llama 3](https://github.com/meta-llama/llama3), [3.1](https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1) and [3.2](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/) inference implemented purely in Scala 3, leveraging the Java Vector API for performance.
 
