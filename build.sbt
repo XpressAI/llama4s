@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "llmtest",
+    name := "llama4s",
     ThisBuild / version := "0.1.0",
     ThisBuild / scalacOptions += "-Wunused:all",
     ThisBuild / fork := true,

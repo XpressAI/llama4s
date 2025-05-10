@@ -1,63 +1,17 @@
 package ai.xpress.llama4s.tensor
 
-import ai.xpress.llama4s.utils.{_, given}
-import java.lang.foreign.MemorySegment
 import java.lang.{Float => JFloat, Byte => JByte, Short => JShort}
-import jdk.incubator.vector.FloatVector
-import jdk.incubator.vector.VectorSpecies
-import jdk.incubator.vector.VectorOperators
-import jdk.incubator.vector.ByteVector
+import jdk.incubator.vector.{ByteVector, FloatVector, VectorOperators, VectorSpecies}
 import java.nio.ByteOrder
 
-final class Q4_0Tensor(val buffer: MemorySegment, val size: Int)(using fspecies: VectorSpecies[JFloat])
-    extends FloatTensor {
-
-  override def set(index: Int, value: Float): Unit = {
-    throw new UnsupportedOperationException("setFloat")
-  }
-
-  override def getVec(offset: Int): FloatVector = {
-    throw new UnsupportedOperationException("getVec")
-  }
-
-  override lazy val dtype: QuantizedDType = QuantizedDType.Q4_0
-
-  override def get(index: Int): Float = {
-    assert(0 <= index && index < size)
-
-    // [ 2 byte scale factor | 4 bits per element x 32 scalar values ]
-    val blockOffset = dtype.blockOffset(index)
-
-    // Load the scale factor
-    val scale = buffer.load[Short](blockOffset).f16ToF32
-
-    // Load the quantized element
-    val modIndex = index % dtype.blockSize
-    val quant = {
-      if (modIndex < dtype.blockSize / 2) {
-        (buffer.load[Byte](blockOffset + Float16.BYTES + modIndex) & 0x0f).toByte
-      } else {
-        ((buffer.load[Byte](blockOffset + Float16.BYTES + modIndex - dtype.blockSize / 2) >>> 4) & 0x0f).toByte
-      }
-    }
-
-    // Reconstruct the float
-    (quant - 8) * scale
-  }
-
+object Q4_0TensorOpsScala {
+  val fspecies: VectorSpecies[JFloat] = FloatTensor.FloatSpecies
   val bspecies: VectorSpecies[JByte] = ByteVector.SPECIES_128
   val byteorder: ByteOrder = ByteOrder.LITTLE_ENDIAN
 
-
-  override def dot(offset: Int, other: FloatTensor, otherOffset: Int, size: Int): Float = {
-    Q4_0TensorOps.vdot(this, offset, other.asInstanceOf[FloatTensor], otherOffset, size)
-    // Q4_0TensorOpsScala.vdot(this, offset, other.asInstanceOf[FloatTensor], otherOffset, size)
-    // vdot2(offset, other.asInstanceOf[FloatTensor], otherOffset, size)
-  }
-
-  def vdot2(thisOffset: Int, that: FloatTensor, thatOffset: Int, size: Int): JFloat = {
-    val blockSize = dtype.blockSize
-    val bytesPerBlock = dtype.bytesPerBlock
+  def vdot(thiz: Q4_0Tensor, thisOffset: Int, that: FloatTensor, thatOffset: Int, size: Int): JFloat = {
+    val blockSize = thiz.dtype.blockSize
+    val bytesPerBlock = thiz.dtype.bytesPerBlock
 
     var result = 0f
     var j = 0
@@ -65,7 +19,7 @@ final class Q4_0Tensor(val buffer: MemorySegment, val size: Int)(using fspecies:
     // Compute for the first few non-aligned entries
     val alignmentBound = Math.min(size, -thisOffset & (blockSize - 1))
     if (alignmentBound > 0) {
-      result += FloatTensor.dot(this, thisOffset, that, thatOffset, alignmentBound)
+      result += FloatTensor.dot(thiz, thisOffset, that, thatOffset, alignmentBound)
       j += alignmentBound
     }
     assert((thisOffset + j) % blockSize == 0)
@@ -76,10 +30,10 @@ final class Q4_0Tensor(val buffer: MemorySegment, val size: Int)(using fspecies:
 
     while (j < upperBound) {
       // Load the scale factor
-      val scale = FloatVector.broadcast(fspecies, FloatTensor.loadF16(buffer, blockOffset))
+      val scale = FloatVector.broadcast(fspecies, FloatTensor.loadF16(thiz.buffer, blockOffset))
 
       // Load the block
-      val wBytes = ByteVector.fromMemorySegment(bspecies, buffer, blockOffset + JShort.BYTES, byteorder)
+      val wBytes = ByteVector.fromMemorySegment(bspecies, thiz.buffer, blockOffset + JShort.BYTES, byteorder)
       val loBytes = wBytes.and(0xF.toByte).sub(8.toByte)
       val hiBytes = wBytes.lanewise(VectorOperators.LSHR, 4).sub(8.toByte)
 
@@ -114,10 +68,10 @@ final class Q4_0Tensor(val buffer: MemorySegment, val size: Int)(using fspecies:
 
     // Compute for the remaining entries
     if (j < size) {
-      result += FloatTensor.dot(this, thisOffset + j, that, thatOffset + j, size - j)
+      result += FloatTensor.dot(thiz, thisOffset + j, that, thatOffset + j, size - j)
     }
 
     result
   }
-
 }
+

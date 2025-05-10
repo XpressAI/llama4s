@@ -55,7 +55,7 @@ final case class SafeTensorsFile(
       builder ++= f"  ${k}%-20s : ${v}\n"
     }
     builder ++= "\n" ++= f"Tensors @ ${tensorDataOffset}\n"
-    tensorInfos.foreach { (_, info) =>
+    tensorInfos.values.toArray.sortBy(_.name).foreach { info =>
       builder ++= info.show + "\n"
     }
     builder.toString
